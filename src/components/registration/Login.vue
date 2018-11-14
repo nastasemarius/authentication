@@ -24,9 +24,7 @@
                     <v-text-field
                         label="Password"
                         :rules="passwordRules"
-                        :append-icon="show ? 'visibility' : 'visibility_off'"
-                        :type="show? 'text' : 'password'"
-                        @click:append="show = !show"
+                        type="password"
                         v-model="password"
                     >
                     </v-text-field>
@@ -47,17 +45,23 @@
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
-import { Action } from "vuex-class";
+import { Action, Getter } from "vuex-class";
 
-@Component({})
+import NoAuthenticationMixin from "../../mixins/NoAuthentication";
+
+@Component({
+  mixins: [NoAuthenticationMixin]
+})
 export default class Login extends Vue {
-  public show: boolean = false;
   public username: string = "";
   public password: string = "";
   public valid: boolean = false;
 
   public usernameRules: any[];
   public passwordRules: any[];
+
+  @Getter("isLoggedIn")
+  isLoggedIn;
 
   @Action("Login")
   signIn: any;
@@ -78,8 +82,16 @@ export default class Login extends Vue {
       });
     }
   }
-  toSignUp(){
-    this.$router.push('/signup');
+  toSignUp() {
+    this.$router.push("/signup");
+  }
+
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      if (vm.isLoggedIn) {
+        next("/");
+      }
+    });
   }
 }
 </script>

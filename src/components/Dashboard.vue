@@ -14,7 +14,7 @@ import { Getter } from "vuex-class";
   mixins: [AuthenticationMixin]
 })
 export default class Dashboard extends Vue {
-  @Getter("isPermitted") isPermitted: any;
+  @Getter("isLoggedIn") isLoggedIn: any;
 }
 </script>
 

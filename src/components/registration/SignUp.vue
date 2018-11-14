@@ -8,35 +8,40 @@
             <h3 class="headline">Sign up</h3>
           </div>
         </v-card-title>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="form">
         <v-container flud grid-list-lg>
           <v-layout column wrap>
               <v-flex xs-12>
                 <v-text-field
                   label="First name"
                   v-model="firstName"
-                  :rules="firstNameRules"
+                  :error-messages="firstNameErrors"
+                  @blur="$v.firstName.$touch()"
+                  required
                 >
                 </v-text-field>
                 <v-text-field
+                  @blur="$v.lastName.$touch()"
+                  :error-messages="lastNameErrors"
                   label="Last Name"
                   v-model="lastName"
-                  :rules="lastNameRules"
                 >
                 </v-text-field>
             </v-flex>
             <v-flex xs-12>
               <v-text-field
+                @blur="$v.username.$touch()"
+                :error-messages="usernameErrors"
                 label="Email"
                 v-model="username"
-                :rules="usernameRules"
               >
               </v-text-field>
             </v-flex>
             <v-flex>
               <v-text-field
                 label="Password"
-                :rules="passwordRules"
+                @blur="$v.password.$touch()"
+                :error-messages="passwordErrors"
                 :append-icon="show ? 'visibility' : 'visibility_off'"
                 :type="show? 'text' : 'password'"
                 @click:append="show = !show"
@@ -47,18 +52,19 @@
             <v-flex>
               <v-text-field
                 label="Password confirmation"
-                :rules="passwordConfirmationRules"
                 :append-icon="show ? 'visibility' : 'visibility_off'"
                 :type="show? 'text' : 'password'"
                 @click:append="show = !show"
                 v-model="passwordConfirmation"
+                @blur="$v.passwordConfirmation.$touch()"
+                :error-messages="passwordConfirmationErrors"
               >
               </v-text-field>
             </v-flex>
           </v-layout>
         </v-container>
         
-        <v-btn @click="register" color="primary" :disabled="!valid">Register</v-btn>
+        <v-btn @click="register"  :disabled="$v.$invalid" color="primary" >Register</v-btn>
         <v-btn @click="goBack" flat color="primary">Back</v-btn>
       
         </v-form>
@@ -71,9 +77,45 @@
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
-import { Action } from "vuex-class";
+import { Action, Getter } from "vuex-class";
+import UsersService from "../../services/users.service";
+import {
+  required,
+  minLength,
+  between,
+  email,
+  sameAs
+} from "vuelidate/lib/validators";
+import { validationMixin } from "vuelidate";
 
-@Component({})
+import NoAuthenticationMixin from "../../mixins/NoAuthentication";
+import errorMessage from "../../shared/error-dictionary";
+
+@Component({
+  mixins: [NoAuthenticationMixin, validationMixin],
+  validations: {
+    firstName: { required, minLength: minLength(3) },
+    lastName: { required, minLength: minLength(3) },
+    username: {
+      required,
+      email,
+      unique: (val: string) => {
+        console.log(`Checking database for email...`);
+        return new Promise((resolve, reject) => {
+          UsersService.findUser(val).then((user: any) => {
+            resolve(val !== user.username);
+          });
+        });
+      }
+    },
+    password: {
+      required,
+      sameAs: sameAs("passwordConfirmation"),
+      minLength: minLength(6)
+    },
+    passwordConfirmation: { required }
+  }
+})
 export default class Login extends Vue {
   public show: boolean = false;
 
@@ -82,38 +124,80 @@ export default class Login extends Vue {
   public username: string = "";
   public password: string = "";
   public passwordConfirmation: string = "";
-  public valid: boolean = false;
 
-  public usernameRules: any[];
-  public passwordRules: any[];
-  public passwordConfirmationRules: any[];
-  public firstNameRules: any[];
-  public lastNameRules: any[];
+  @Getter("isLoggedIn")
+  isLoggedIn;
 
   @Action("SignUp")
   signUp: any;
   constructor() {
     super();
-    this.usernameRules = [
-      (v: string) => !!v || "E-mail is required",
-      (v: string) => /.+@.+/.test(v) || "E-mail must be valid"
-    ];
-    this.passwordRules = [
-      (v: string) => !!v || "Password is required",
-      (v: string) =>
-        v === this.passwordConfirmation ||
-        !this.passwordConfirmation ||
-        "Password should match Password confirmation"
-    ];
-    this.passwordConfirmationRules = [
-      (v: string) => !!v || "Password confirmation is required"
-    ];
-    this.firstNameRules = [(v: string) => !!v || "First name is required"];
-    this.lastNameRules = [(v: string) => !!v || "Last name is required"];
+  }
+
+  get firstNameErrors() {
+    const errors: any[] = [];
+
+    if (!(this.$v as any).firstName.$dirty) return errors;
+    !(this.$v as any).firstName.minLength &&
+      errors.push(errorMessage("minLength", "First name", "3"));
+    !(this.$v as any).firstName.required &&
+      errors.push(errorMessage("required", "First name"));
+
+    return errors;
+  }
+
+  get lastNameErrors() {
+    const errors: any[] = [];
+    if (!(this.$v as any).lastName.$dirty) return errors;
+    !(this.$v as any).lastName.minLength &&
+      errors.push(errorMessage("minLength", "Last name", "3"));
+    !(this.$v as any).lastName.required &&
+      errors.push(errorMessage("required", "Last name"));
+
+    return errors;
+  }
+
+  get usernameErrors() {
+    const errors: any[] = [];
+    if (!(this.$v as any).username.$dirty) return errors;
+    !(this.$v as any).username.required &&
+      errors.push(errorMessage("required", "Email"));
+    !(this.$v as any).username.email &&
+      errors.push(errorMessage("email", "Email"));
+
+    !(this.$v as any).username.unique &&
+      errors.push(errorMessage("unique", "Email"));
+
+    return errors;
+  }
+
+  get passwordErrors() {
+    const errors: any[] = [];
+    if (!(this.$v as any).password.$dirty) return errors;
+    !(this.$v as any).password.required &&
+      errors.push(errorMessage("required", "Password"));
+    !(this.$v as any).password.sameAs &&
+      errors.push(
+        errorMessage("sameAs", "Password", "", "password confirmation")
+      );
+    !(this.$v as any).password.minLength &&
+      errors.push(errorMessage("minLength", "Password", "6"));
+
+    return errors;
+  }
+
+  get passwordConfirmationErrors() {
+    const errors: any[] = [];
+    if (!(this.$v as any).passwordConfirmation.$dirty) return errors;
+    !(this.$v as any).passwordConfirmation.required &&
+      errors.push(errorMessage("required", "Password confirmation"));
+
+    return errors;
   }
 
   register() {
-    if ((this.$refs.form as any).validate()) {
+    this.$v.$touch();
+    if (!this.$v.$invalid) {
       this.signUp({
         firstName: this.firstName,
         lastName: this.lastName,

@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import AuthController from './routes/auth.routes';
+import AuthRoutes from './routes/auth.routes';
+import UsersRoutes from './routes/users.routes';
 
 class App {
     public app: express.Application;
@@ -21,7 +22,8 @@ class App {
     }
 
     private configureRoutes() {
-        this.app.use('/auth', AuthController)
+        this.app.use('/auth', AuthRoutes)
+        this.app.use('/users', UsersRoutes)
     }
 }
 const app = new App().app

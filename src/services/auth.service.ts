@@ -15,7 +15,6 @@ class AuthService extends BaseService {
         let url = this.buildUrl('signup');
         return Http.post(url, userInfo)
     }
+    
 }
-
-const authService = new AuthService();
-export default authService;
+export default new AuthService();

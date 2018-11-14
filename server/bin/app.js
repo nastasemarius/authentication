@@ -7,6 +7,7 @@ var express_1 = __importDefault(require("express"));
 var cors_1 = __importDefault(require("cors"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var auth_routes_1 = __importDefault(require("./routes/auth.routes"));
+var users_routes_1 = __importDefault(require("./routes/users.routes"));
 var App = /** @class */ (function () {
     function App() {
         this.app = express_1.default();
@@ -20,6 +21,7 @@ var App = /** @class */ (function () {
     };
     App.prototype.configureRoutes = function () {
         this.app.use('/auth', auth_routes_1.default);
+        this.app.use('/users', users_routes_1.default);
     };
     return App;
 }());

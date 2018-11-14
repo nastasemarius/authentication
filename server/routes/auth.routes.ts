@@ -35,18 +35,24 @@ router.post('/login', (req: Request, res: Response) => {
         .then(user => {
             if (user) {
                 bcrypt.compare(req.body.password, user.password)
-                    .then(() => {
-                        const token: string = jwt.sign({
-                            permissions: ["read", "write"],
-                            username: user.username,
-                            firstName: user.firstname,
-                            lastName: user.lastName
-                        }, 'secret', { expiresIn: '24h' });
+                    .then((match) => {
+                        if (match) {
+                            const token: string = jwt.sign({
+                                permissions: ["read", "write"],
+                                username: user.username,
+                                firstName: user.firstname,
+                                lastName: user.lastName
+                            }, 'secret', { expiresIn: '24h' });
 
-                        res.send({
-                            success: 'User password matches',
-                            token
-                        });
+                            res.send({
+                                success: 'Password matches',
+                                token
+                            });
+                        } else {
+                            res.sendStatus(401).json({
+                                error: 'Password does not match'
+                            });
+                        }
                     })
                     .catch(err => {
                         res.sendStatus(401).json({

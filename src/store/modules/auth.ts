@@ -1,16 +1,14 @@
 import router from "../../router";
 import authService from '../../services/auth.service';
+import decode from 'jwt-decode'
 
-const state = {
-  username: "",
-  permissions: []
-};
+const state = initialState();
 
 const getters = {
   username(state) {
     return state.username;
   },
-  isPermitted(state) {
+  isLoggedIn(state) {
     return state.username !== "" && state.permissions.length > 0;
   }
 };
@@ -64,3 +62,22 @@ export default {
   mutations,
   actions
 };
+
+function initialState() {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const decoded: any = decode(token);
+    const username = decoded.username;
+    const permissions = decoded.permissions;
+    return {
+      token,
+      username,
+      permissions
+    };
+  }
+  return {
+    username: "",
+    permissions: [],
+    token: ""
+  };
+}

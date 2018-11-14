@@ -48,17 +48,24 @@ router.post('/login', function (req, res) {
         .then(function (user) {
         if (user) {
             bcryptjs_1.default.compare(req.body.password, user.password)
-                .then(function () {
-                var token = jsonwebtoken_1.default.sign({
-                    permissions: ["read", "write"],
-                    username: user.username,
-                    firstName: user.firstname,
-                    lastName: user.lastName
-                }, 'secret', { expiresIn: '24h' });
-                res.send({
-                    success: 'User password matches',
-                    token: token
-                });
+                .then(function (match) {
+                if (match) {
+                    var token = jsonwebtoken_1.default.sign({
+                        permissions: ["read", "write"],
+                        username: user.username,
+                        firstName: user.firstname,
+                        lastName: user.lastName
+                    }, 'secret', { expiresIn: '24h' });
+                    res.send({
+                        success: 'Password matches',
+                        token: token
+                    });
+                }
+                else {
+                    res.sendStatus(401).json({
+                        error: 'Password does not match'
+                    });
+                }
             })
                 .catch(function (err) {
                 res.sendStatus(401).json({
