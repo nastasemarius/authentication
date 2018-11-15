@@ -30,9 +30,9 @@
             </v-flex>
             <v-flex xs-12>
               <v-text-field
-                @blur="$v.username.$touch()"
                 :error-messages="usernameErrors"
                 label="Email"
+                @blur="$v.username.$touch()"
                 v-model="username"
               >
               </v-text-field>
@@ -94,19 +94,21 @@ import errorMessage from "../../shared/error-dictionary";
 @Component({
   mixins: [NoAuthenticationMixin, validationMixin],
   validations: {
-    firstName: { required, minLength: minLength(3) },
+    firstName: { required, minLength: minLength(10) },
     lastName: { required, minLength: minLength(3) },
     username: {
-      required,
-      email,
-      unique: (val: string) => {
-        console.log(`Checking database for email...`);
+      isUnique(val: string) {
+        if (!val) {
+          return true;
+        }
         return new Promise((resolve, reject) => {
           UsersService.findUser(val).then((user: any) => {
-            resolve(val !== user.username);
+            resolve(val !== user.data.username);
           });
         });
-      }
+      },
+      required,
+      email
     },
     password: {
       required,
@@ -139,7 +141,7 @@ export default class Login extends Vue {
 
     if (!(this.$v as any).firstName.$dirty) return errors;
     !(this.$v as any).firstName.minLength &&
-      errors.push(errorMessage("minLength", "First name", "3"));
+      errors.push(errorMessage("minLength", "First name", (this.$v.firstName as any).$params.minLength.min));
     !(this.$v as any).firstName.required &&
       errors.push(errorMessage("required", "First name"));
 
@@ -150,7 +152,7 @@ export default class Login extends Vue {
     const errors: any[] = [];
     if (!(this.$v as any).lastName.$dirty) return errors;
     !(this.$v as any).lastName.minLength &&
-      errors.push(errorMessage("minLength", "Last name", "3"));
+      errors.push(errorMessage("minLength", "Last name", (this.$v.lastName as any).$params.minLength.min));
     !(this.$v as any).lastName.required &&
       errors.push(errorMessage("required", "Last name"));
 
@@ -165,7 +167,7 @@ export default class Login extends Vue {
     !(this.$v as any).username.email &&
       errors.push(errorMessage("email", "Email"));
 
-    !(this.$v as any).username.unique &&
+    !(this.$v as any).username.isUnique &&
       errors.push(errorMessage("unique", "Email"));
 
     return errors;
@@ -181,7 +183,7 @@ export default class Login extends Vue {
         errorMessage("sameAs", "Password", "", "password confirmation")
       );
     !(this.$v as any).password.minLength &&
-      errors.push(errorMessage("minLength", "Password", "6"));
+      errors.push(errorMessage("minLength", "Password", (this.$v.password as any).$params.minLength.min));
 
     return errors;
   }
