@@ -68,6 +68,9 @@
       </v-navigation-drawer>
       <v-breadcrumbs :items="breadcrumbs">
         <v-icon slot="divider">chevron_right</v-icon>
+        <template slot="item" slot-scope="props">
+         <router-link :to="props.item.href" :class="{disabled:props.item.current}"> {{props.item.text.toUpperCase() }}</router-link>
+        </template>
       </v-breadcrumbs>
       <app-snackbar></app-snackbar>
      <router-view></router-view>
@@ -84,6 +87,11 @@
 }
 .v-navigation-drawer__border {
   width: 0px;
+}
+
+.disabled {
+  color: grey !important;
+  pointer-events: none;
 }
 </style>
 

@@ -14,7 +14,7 @@ const routes = [
     component: Dashboard,
     name: 'Home',
     meta: {
-      breadcrumbs: [{ text: 'Dashboard', href: "/" }]
+      breadcrumbs: [{ text: 'Dashboard', href: "/", current: true }]
     }
   },
   { path: "/login", component: Login },
@@ -24,7 +24,7 @@ const routes = [
     name: 'Diagrams',
     component: NeckDiagrams,
     meta: {
-      breadcrumbs: [{ text: 'Home', href: '/' }, { text: 'Diagrams', href: '/diagrams' }]
+      breadcrumbs: [{ text: 'Home', href: '/' }, { text: 'Diagrams', href: '/diagrams', current: true }]
     }
   },
   {

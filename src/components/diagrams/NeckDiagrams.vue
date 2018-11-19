@@ -1,6 +1,8 @@
 <template>
     <div>
-        <h1>Neck diagrams</h1>
+        <v-container>
+            <v-layout justify-left><h1>Neck diagrams</h1></v-layout>
+        </v-container>
     </div>
 </template>
 
