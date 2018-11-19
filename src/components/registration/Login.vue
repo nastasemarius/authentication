@@ -9,30 +9,37 @@
             <div>Please enter your credentials and log into the application or sign-up</div>
           </div>
         </v-card-title>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="form">
         <v-container flud grid-list-lg>
             <v-layout column wrap>
                 <v-flex xs-12>
                     <v-text-field
-                         label="Email"
-                         v-model="username"
-                         :rules="usernameRules"
+                        label="Email"
+                        v-model="username"
+                        :error-messages="usernameErrors"
+                        @blur="$v.username.$touch()"
                     >
                     </v-text-field>
                 </v-flex>
                 <v-flex>
                     <v-text-field
                         label="Password"
-                        :rules="passwordRules"
                         type="password"
                         v-model="password"
+                        :error-messages="passwordErrors"
+                        @blur="$v.password.$touch()"
                     >
                     </v-text-field>
                 </v-flex>
             </v-layout>
         </v-container>
         
-        <v-btn @click="login" color="primary" :disabled="!valid">Login</v-btn>
+        <v-btn 
+          @click="login"
+          color="primary" 
+          :disabled="$v.$invalid"
+
+        >Login</v-btn>
         <v-btn @click="toSignUp" flat color="primary">Sign up</v-btn>
       
         </v-form>
@@ -47,18 +54,24 @@
 import { Vue, Component } from "vue-property-decorator";
 import { Action, Getter } from "vuex-class";
 
+import { withParams } from "vuelidate/lib";
+import { required, minLength, email } from "vuelidate/lib/validators";
+import { validationMixin } from "vuelidate";
+
 import NoAuthenticationMixin from "../../mixins/NoAuthentication";
+import ErrorGenerator, { FormValidator } from "../../shared/error-parser";
+import CustomValidators from "../../shared/validators";
 
 @Component({
-  mixins: [NoAuthenticationMixin]
+  mixins: [NoAuthenticationMixin, validationMixin],
+  validations: {
+    username: { required, email },
+    password: { required, minLength: minLength(6) }
+  }
 })
 export default class Login extends Vue {
   public username: string = "";
   public password: string = "";
-  public valid: boolean = false;
-
-  public usernameRules: any[];
-  public passwordRules: any[];
 
   @Getter("isLoggedIn")
   isLoggedIn;
@@ -67,15 +80,19 @@ export default class Login extends Vue {
   signIn: any;
   constructor() {
     super();
-    this.usernameRules = [
-      (v: string) => !!v || "E-mail is required",
-      (v: string) => /.+@.+/.test(v) || "E-mail must be valid"
-    ];
-    this.passwordRules = [(v: string) => !!v || "Password is required"];
+  }
+
+  get usernameErrors() {
+    return ErrorGenerator.parse(<FormValidator>this.$v.username, "Email");
+  }
+
+  get passwordErrors() {
+    return ErrorGenerator.parse(<FormValidator>this.$v.password, "Password");
   }
 
   login() {
-    if ((this.$refs.form as any).validate()) {
+    this.$v.$touch();
+    if (!this.$v.$invalid) {
       this.signIn({
         username: this.username,
         password: this.password

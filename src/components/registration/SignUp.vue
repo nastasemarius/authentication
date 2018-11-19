@@ -86,15 +86,19 @@ import {
   email,
   sameAs
 } from "vuelidate/lib/validators";
+
+import { withParams } from "vuelidate/lib";
 import { validationMixin } from "vuelidate";
 
 import NoAuthenticationMixin from "../../mixins/NoAuthentication";
+import ErrorGenerator, { FormValidator } from "../../shared/error-parser";
 import errorMessage from "../../shared/error-dictionary";
+import CustomValidators from '../../shared/validators';
 
 @Component({
   mixins: [NoAuthenticationMixin, validationMixin],
   validations: {
-    firstName: { required, minLength: minLength(10) },
+    firstName: { required, minLength: minLength(3) },
     lastName: { required, minLength: minLength(3) },
     username: {
       isUnique(val: string) {
@@ -136,66 +140,30 @@ export default class Login extends Vue {
     super();
   }
 
-  get firstNameErrors() {
-    const errors: any[] = [];
-
-    if (!(this.$v as any).firstName.$dirty) return errors;
-    !(this.$v as any).firstName.minLength &&
-      errors.push(errorMessage("minLength", "First name", (this.$v.firstName as any).$params.minLength.min));
-    !(this.$v as any).firstName.required &&
-      errors.push(errorMessage("required", "First name"));
-
-    return errors;
+get firstNameErrors() {
+    return ErrorGenerator.parse(<FormValidator>this.$v.firstName, "First name");
   }
 
   get lastNameErrors() {
-    const errors: any[] = [];
-    if (!(this.$v as any).lastName.$dirty) return errors;
-    !(this.$v as any).lastName.minLength &&
-      errors.push(errorMessage("minLength", "Last name", (this.$v.lastName as any).$params.minLength.min));
-    !(this.$v as any).lastName.required &&
-      errors.push(errorMessage("required", "Last name"));
-
-    return errors;
+    return ErrorGenerator.parse(<FormValidator>this.$v.lastName, "Last name");
   }
 
   get usernameErrors() {
-    const errors: any[] = [];
-    if (!(this.$v as any).username.$dirty) return errors;
-    !(this.$v as any).username.required &&
-      errors.push(errorMessage("required", "Email"));
-    !(this.$v as any).username.email &&
-      errors.push(errorMessage("email", "Email"));
-
-    !(this.$v as any).username.isUnique &&
-      errors.push(errorMessage("unique", "Email"));
-
-    return errors;
+    return ErrorGenerator.parse(<FormValidator>this.$v.username, "Email");
   }
 
   get passwordErrors() {
-    const errors: any[] = [];
-    if (!(this.$v as any).password.$dirty) return errors;
-    !(this.$v as any).password.required &&
-      errors.push(errorMessage("required", "Password"));
-    !(this.$v as any).password.sameAs &&
-      errors.push(
-        errorMessage("sameAs", "Password", "", "password confirmation")
-      );
-    !(this.$v as any).password.minLength &&
-      errors.push(errorMessage("minLength", "Password", (this.$v.password as any).$params.minLength.min));
-
-    return errors;
+    return ErrorGenerator.parse(<FormValidator>this.$v.password, "Password");
   }
 
   get passwordConfirmationErrors() {
-    const errors: any[] = [];
-    if (!(this.$v as any).passwordConfirmation.$dirty) return errors;
-    !(this.$v as any).passwordConfirmation.required &&
-      errors.push(errorMessage("required", "Password confirmation"));
-
-    return errors;
+    return ErrorGenerator.parse(
+      <FormValidator>this.$v.passwordConfirmation,
+      "Password confirmation"
+    );
   }
+
+ 
 
   register() {
     this.$v.$touch();

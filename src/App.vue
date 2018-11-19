@@ -53,19 +53,23 @@
           absolute
           temporary
         >
-          <v-list dense class="pt-0">
-            <v-list-tile class="highlight" v-for="i in 10" :key="i">
+          <v-list>
+            <v-list-tile class="highlight" v-for="path in paths" :key="path.link" @click="navigateToLink(path.link)">
               <v-list-tile-action>
-                <v-icon>question_answer</v-icon>
+                <v-icon>{{path.icon}}</v-icon>
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>
-                  Action {{ i }}
+                 {{path.text}}
                 </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
       </v-navigation-drawer>
+      <v-breadcrumbs :items="breadcrumbs">
+        <v-icon slot="divider">chevron_right</v-icon>
+      </v-breadcrumbs>
+      <app-snackbar></app-snackbar>
      <router-view></router-view>
     </v-content>
   </v-app>
@@ -85,19 +89,55 @@
 
 
 <script lang="ts">
-import { Vue, Component } from "vue-property-decorator";
+import { Vue, Component, Watch } from "vue-property-decorator";
 import { Getter, Action } from "vuex-class";
+
+import SnackbarComponent from "./components/Snackbar.vue";
+
 @Component({
   name: "app",
-  mixins: []
+  mixins: [],
+  components: {
+    appSnackbar: SnackbarComponent
+  }
 })
 export default class App extends Vue {
   @Getter("username")
   user: any;
+  @Getter("breadcrumbs")
+  breadcrumbs;
   @Action("Logout")
   logout: any;
+  @Action("SetBreadcrumbs")
+  setBreadcrumbs;
+  @Watch("$route")
+  onRouteChange(val: any, oldVal: any) {
+    this.updateBreadcrumbs();
+  }
+
   public drawer: boolean = false;
-  toSettings() {}
+
+  updateBreadcrumbs() {
+    this.setBreadcrumbs(this.$route.meta.breadcrumbs);
+  }
+
+  created() {
+    this.updateBreadcrumbs();
+  }
+
+  public paths = [
+    { text: "Dashboard", icon: "home", link: "/" },
+    { text: "Neck diagrams", icon: "library_music", link: "/diagrams" }
+  ];
+
+  public navigateToLink(link) {
+    this.$router.push(link);
+  }
+
+  public toSettings() {
+    this.$router.push("/settings");
+  }
+
   signout() {
     this.logout();
   }

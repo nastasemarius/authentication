@@ -4,7 +4,8 @@ const Errors = {
     'required': '%{field} is required',
     'email': '%{field} is not valid',
     'sameAs': '%{field} must match %{field2}',
-    'unique': '%{field} already exists'
+    'isUnique': '%{field} already exists',
+    'between': '%{field} must be between %{value1} and %{value2} characters long'
 }
 
 export default function errorMessage(errorType, field: string, value1?: string, field2?: string, value2?: string) {

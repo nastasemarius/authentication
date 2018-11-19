@@ -12,6 +12,8 @@ Vue.use(Vuelidate);
 
 Vue.config.productionTip = false;
 
+console.log('State is:',store.state);
+
 new Vue({
   router,
   store,

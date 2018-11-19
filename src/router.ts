@@ -4,12 +4,29 @@ import Dashboard from "./components/Dashboard.vue";
 import PageNotFound from "./components/PageNotFound.vue";
 import Login from "./components/registration/Login.vue";
 import SignUp from "./components/registration/SignUp.vue";
+import NeckDiagrams from './components/diagrams/NeckDiagrams.vue';
+
 Vue.use(Router);
 
 const routes = [
-  { path: "/", component: Dashboard },
+  {
+    path: "/",
+    component: Dashboard,
+    name: 'Home',
+    meta: {
+      breadcrumbs: [{ text: 'Dashboard', href: "/" }]
+    }
+  },
   { path: "/login", component: Login },
-  {path:"/signup",component: SignUp},
+  { path: "/signup", component: SignUp },
+  {
+    path: "/diagrams",
+    name: 'Diagrams',
+    component: NeckDiagrams,
+    meta: {
+      breadcrumbs: [{ text: 'Home', href: '/' }, { text: 'Diagrams', href: '/diagrams' }]
+    }
+  },
   {
     path: "*",
     component: PageNotFound

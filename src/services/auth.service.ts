@@ -9,12 +9,14 @@ class AuthService extends BaseService {
 
     login(credentials: any): Promise<any> {
         let url = this.buildUrl('login');
-        return Http.post(url, credentials);
+        return Http.post(url, credentials)
+
     }
     signUp(userInfo: any): Promise<any> {
         let url = this.buildUrl('signup');
         return Http.post(url, userInfo)
+
     }
-    
+
 }
 export default new AuthService();

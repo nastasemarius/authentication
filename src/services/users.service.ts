@@ -9,6 +9,7 @@ class UsersService extends BaseService {
     public findUser(username) {
         let url = this.buildUrl(username);
         return Http.get(url)
+            .catch(err => console.log(err))
     }
 }
 

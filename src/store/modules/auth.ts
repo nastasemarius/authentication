@@ -38,18 +38,24 @@ const actions = {
           localStorage.setItem('token', response.data.token);
           commit("SET_TOKEN", response.data);
           commit("LOGIN", payload);
+          commit("SHOW_SNACKBAR", { text: 'Login successful!',success: true })
         }
-      });
+      })
+      .catch(err => {
+        commit("SHOW_SNACKBAR", { text: 'Login failed. Email or password is invalid.', success: false })
+      })
   },
   SignUp({ commit }, payload) {
     authService.signUp(payload)
       .then((response: any) => {
         if (response.data && response.data.success) {
+          commit("SHOW_SNACKBAR", { text: 'Signup successful!',success: true })
           commit('LOGIN', payload)
-        } else {
-          console.log('REGISTRATION FAILED.');
         }
-      });
+      })
+      .catch(err => {
+        commit("SHOW_SNACKBAR", { text: 'Sign up failed. Please try again later', success: false })
+      })
   },
   Logout({ commit }) {
     commit("LOGOUT");
@@ -81,3 +87,4 @@ function initialState() {
     token: ""
   };
 }
+
