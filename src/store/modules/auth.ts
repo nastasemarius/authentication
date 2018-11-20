@@ -6,26 +6,37 @@ const state = initialState();
 
 const getters = {
   username(state) {
-    return state.username;
+    if (state.token !== "")
+      return (decode(state.token) as any).username;
+    return "";
   },
   isLoggedIn(state) {
-    return state.username !== "" && state.permissions.length > 0;
+    if (state.token !== "" && !isExpired((decode(state.token) as any).exp)) {
+      const info: any = decode(state.token);
+      return info.username !== "" && info.permissions.length > 0;
+    }
+    return false;
+  },
+  fullName(state) {
+    if (state.token !== "") {
+      const decoded: any = decode(state.token);
+      return `${decoded.firstName} ${decoded.lastName}`;
+    } else {
+      return "";
+    }
   }
 };
 
 const mutations = {
   LOGIN(state: any, { username }) {
-    state.username = username;
-    state.permissions = ["read", "write"];
     router.push({ path: "/" });
   },
   SET_TOKEN(state: any, { token }) {
     state.token = token;
   },
   LOGOUT(state: any) {
-    state.username = "";
-    state.permissions = [];
     router.push({ path: "/login" });
+    state.token = "";
     localStorage.removeItem('token');
   }
 };
@@ -38,7 +49,7 @@ const actions = {
           localStorage.setItem('token', response.data.token);
           commit("SET_TOKEN", response.data);
           commit("LOGIN", payload);
-          commit("SHOW_SNACKBAR", { text: 'Login successful!',success: true })
+          commit("SHOW_SNACKBAR", { text: 'Login successful!', success: true })
         }
       })
       .catch(err => {
@@ -49,7 +60,7 @@ const actions = {
     authService.signUp(payload)
       .then((response: any) => {
         if (response.data && response.data.success) {
-          commit("SHOW_SNACKBAR", { text: 'Signup successful!',success: true })
+          commit("SHOW_SNACKBAR", { text: 'Signup successful!', success: true })
           commit('LOGIN', payload)
         }
       })
@@ -71,20 +82,12 @@ export default {
 
 function initialState() {
   const token = localStorage.getItem('token');
-  if (token) {
-    const decoded: any = decode(token);
-    const username = decoded.username;
-    const permissions = decoded.permissions;
-    return {
-      token,
-      username,
-      permissions
-    };
-  }
   return {
-    username: "",
-    permissions: [],
-    token: ""
-  };
+    token: token || ""
+  }
+}
+
+function isExpired(exp: number) {
+  return Date.now() < exp;
 }
 

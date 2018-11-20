@@ -53,7 +53,7 @@ router.post('/login', function (req, res) {
                     var token = jsonwebtoken_1.default.sign({
                         permissions: ["read", "write"],
                         username: user.username,
-                        firstName: user.firstname,
+                        firstName: user.firstName,
                         lastName: user.lastName
                     }, 'secret', { expiresIn: '24h' });
                     res.send({

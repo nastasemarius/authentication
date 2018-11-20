@@ -40,7 +40,7 @@ router.post('/login', (req: Request, res: Response) => {
                             const token: string = jwt.sign({
                                 permissions: ["read", "write"],
                                 username: user.username,
-                                firstName: user.firstname,
+                                firstName: user.firstName,
                                 lastName: user.lastName
                             }, 'secret', { expiresIn: '24h' });
 

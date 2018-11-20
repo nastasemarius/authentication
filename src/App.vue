@@ -14,12 +14,6 @@
         <span class="font-weight-light">AUTHENTICATION</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <!-- <v-btn
-        flat
-      >
-        <span class="mr-2">user@domain.com</span>
-
-      </v-btn> -->
       {{user}}
       <v-menu offset-y v-if="user">
       <v-btn
@@ -53,6 +47,26 @@
           absolute
           temporary
         >
+          <v-list>
+            <v-list-tile avatar>
+              <v-list-tile-avatar>
+                <img src="https://randomuser.me/api/portraits/men/85.jpg">
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title>{{name}}</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+
+             <v-list-tile dense class="highlight"  @click="toSettings">
+              <v-list-tile-action>
+                <v-icon>settings</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Settings</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+          </v-list>
+          <v-divider></v-divider>
           <v-list>
             <v-list-tile class="highlight" v-for="path in paths" :key="path.link" @click="navigateToLink(path.link)">
               <v-list-tile-action>
@@ -112,6 +126,8 @@ import SnackbarComponent from "./components/Snackbar.vue";
 export default class App extends Vue {
   @Getter("username")
   user: any;
+  @Getter("fullName")
+  name: any;
   @Getter("breadcrumbs")
   breadcrumbs;
   @Action("Logout")

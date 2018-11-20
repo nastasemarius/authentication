@@ -6,6 +6,9 @@ const state = {
 const getters = {
     breadcrumbs: (state) => {
         return state.breadcrumbs;
+    },
+    drawer(state) {
+        return state.drawer
     }
 }
 
