@@ -1,67 +1,58 @@
-import { createLocalVue, shallowMount } from "@vue/test-utils";
+import { shallowMount, createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
-import VueRouter from "vue-router";
-import Vuelidate, { validationMixin } from "vuelidate";
-
+import Vue from "vue";
 import Vuetify from "vuetify";
+import Login from "@/components/registration/Login.vue";
+import vuelidate from "vuelidate";
+import VueRouter from "vue-router";
 
-
-import LoginComponent from "@/components/registration/Login.vue";
-
-import NoAuthenticationMixin from "@/mixins/NoAuthentication";
-
-import sinon from "sinon";
-import { expect } from "chai";
+const state = {
+  token: "test-token"
+};
 
 const localVue = createLocalVue();
 
-localVue.use(VueRouter);
 localVue.use(Vuex);
-localVue.use(Vuelidate);
-localVue.use(Vuetify);
+localVue.use(VueRouter);
+localVue.use(vuelidate);
+Vue.use(Vuetify);
 
-const $route = {
-  path: "/login"
-};
+const loginSpy = jest.fn();
 
-describe("LOGIN COMPONENT", () => {
-  let state;
-  let store;
-  let actions;
-  let getters = {
-    isLoggedIn: () => false
-  };
-
-  beforeEach(() => {
-    state = {
-      token: ""
-    };
-
-    actions = {
-      Login: sinon.spy()
-    };
-
-    store = new Vuex.Store({
-      modules: {
-        auth: {
-          state,
-          actions,
-          getters
-        }
+const store = new Vuex.Store({
+  modules: {
+    auth: {
+      state,
+      getters: { isLoggedIn: () => false },
+      actions: {
+        Login: loginSpy
       }
-    });
+    }
+  }
+});
+
+describe("Login component", () => {
+  it("gets the login state", () => {
+    const wrapper = shallowMount(Login, { localVue, store });
+    expect((wrapper.vm as any).isLoggedIn).toBe(false);
   });
-  it("calls store action 'login' when button is clicked", () => {
-    const wrapper = shallowMount(LoginComponent, {
-      stubs: ["a", "b", "c", "d", "e", "f", "g"],
-      mixins: [NoAuthenticationMixin, validationMixin],
-      mocks: {
-        store,
-        localVue,
-        $route
-      }
-    });
 
-    expect(wrapper.find("button")).to.not.be.undefined;
+  it("cannot login with invalid data", () => {
+    const wrapper = shallowMount(Login, { localVue, store });
+    wrapper.vm.$v.$touch();
+    expect(wrapper.vm.$v.$invalid).toBe(true);
+  });
+
+  it("can login with valid data", () => {
+    const wrapper = shallowMount(Login, { localVue, store });
+    const vm: any = wrapper.vm;
+
+    vm.username = "vasile@gmail.com";
+    vm.password = "def123";
+
+    vm.login();
+    expect(vm.$v.$invalid).toBe(false);
+
+    expect(loginSpy).toHaveBeenCalled();
   });
 });

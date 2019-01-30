@@ -1,77 +1,70 @@
 <template>
   <v-layout>
-  <v-container>
-  <v-flex  xs12 sm6 offset-sm3>
-    <v-card>
-        <v-card-title primary-title>
-          <div>
-            <h3 class="headline">Sign up</h3>
-          </div>
-        </v-card-title>
-        <v-form ref="form">
-        <v-container flud grid-list-lg>
-          <v-layout column wrap>
-              <v-flex xs-12>
-                <v-text-field
-                  label="First name"
-                  v-model="firstName"
-                  :error-messages="firstNameErrors"
-                  @blur="$v.firstName.$touch()"
-                  required
-                >
-                </v-text-field>
-                <v-text-field
-                  @blur="$v.lastName.$touch()"
-                  :error-messages="lastNameErrors"
-                  label="Last Name"
-                  v-model="lastName"
-                >
-                </v-text-field>
-            </v-flex>
-            <v-flex xs-12>
-              <v-text-field
-                :error-messages="usernameErrors"
-                label="Email"
-                @blur="$v.username.$touch()"
-                v-model="username"
-              >
-              </v-text-field>
-            </v-flex>
-            <v-flex>
-              <v-text-field
-                label="Password"
-                @blur="$v.password.$touch()"
-                :error-messages="passwordErrors"
-                :append-icon="show ? 'visibility' : 'visibility_off'"
-                :type="show? 'text' : 'password'"
-                @click:append="show = !show"
-                v-model="password"
-              >
-             </v-text-field>
-            </v-flex>
-            <v-flex>
-              <v-text-field
-                label="Password confirmation"
-                :append-icon="show ? 'visibility' : 'visibility_off'"
-                :type="show? 'text' : 'password'"
-                @click:append="show = !show"
-                v-model="passwordConfirmation"
-                @blur="$v.passwordConfirmation.$touch()"
-                :error-messages="passwordConfirmationErrors"
-              >
-              </v-text-field>
-            </v-flex>
-          </v-layout>
-        </v-container>
-        
-        <v-btn @click="register"  :disabled="$v.$invalid" color="primary" >Register</v-btn>
-        <v-btn @click="goBack" flat color="primary">Back</v-btn>
-      
-        </v-form>
-     
-    </v-card>
- </v-flex>
-  </v-container>
+    <v-container>
+      <v-flex xs12 sm6 offset-sm3>
+        <v-card flat>
+          <v-card-title primary-title>
+            <div>
+              <h3 class="headline">Sign up</h3>
+            </div>
+          </v-card-title>
+          <v-form ref="form">
+            <v-container flud grid-list-lg>
+              <v-layout column wrap>
+                <v-flex xs-12>
+                  <v-text-field
+                    label="First name"
+                    v-model="firstName"
+                    :error-messages="firstNameErrors"
+                    @blur="$v.firstName.$touch()"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    @blur="$v.lastName.$touch()"
+                    :error-messages="lastNameErrors"
+                    label="Last Name"
+                    v-model="lastName"
+                  ></v-text-field>
+                </v-flex>
+                <v-flex xs-12>
+                  <v-text-field
+                    :error-messages="usernameErrors"
+                    label="Email"
+                    @blur="$v.username.$touch()"
+                    v-model="username"
+                  ></v-text-field>
+                </v-flex>
+                <v-flex>
+                  <v-text-field
+                    label="Password"
+                    @blur="$v.password.$touch()"
+                    :error-messages="passwordErrors"
+                    :append-icon="show ? 'visibility' : 'visibility_off'"
+                    :type="show? 'text' : 'password'"
+                    @click:append="show = !show"
+                    v-model="password"
+                  ></v-text-field>
+                </v-flex>
+                <v-flex>
+                  <v-text-field
+                    label="Password confirmation"
+                    :append-icon="show ? 'visibility' : 'visibility_off'"
+                    :type="show? 'text' : 'password'"
+                    @click:append="show = !show"
+                    v-model="passwordConfirmation"
+                    @blur="$v.passwordConfirmation.$touch()"
+                    :error-messages="passwordConfirmationErrors"
+                  ></v-text-field>
+                </v-flex>
+              </v-layout>
+            </v-container>
+
+            <v-btn @click="register" :disabled="$v.$invalid" color="primary">Register</v-btn>
+            <v-btn @click="goBack" flat color="primary">Back</v-btn>
+          </v-form>
+        </v-card>
+      </v-flex>
+    </v-container>
   </v-layout>
 </template>
 
@@ -93,7 +86,7 @@ import { validationMixin } from "vuelidate";
 import NoAuthenticationMixin from "../../mixins/NoAuthentication";
 import ErrorGenerator, { FormValidator } from "../../shared/error-parser";
 import errorMessage from "../../shared/error-dictionary";
-import CustomValidators from '../../shared/validators';
+import CustomValidators from "../../shared/validators";
 
 @Component({
   mixins: [NoAuthenticationMixin, validationMixin],
@@ -140,7 +133,7 @@ export default class Login extends Vue {
     super();
   }
 
-get firstNameErrors() {
+  get firstNameErrors() {
     return ErrorGenerator.parse(<FormValidator>this.$v.firstName, "First name");
   }
 
@@ -162,8 +155,6 @@ get firstNameErrors() {
       "Password confirmation"
     );
   }
-
- 
 
   register() {
     this.$v.$touch();

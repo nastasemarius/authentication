@@ -1,11 +1,8 @@
 <template>
-  <v-app>
+  <v-app :dark="isDark">
     <v-toolbar app>
       <v-layout justify-left v-show="user">
-        <v-btn
-          icon
-          @click.stop="drawer = !drawer"
-        >
+        <v-btn icon @click.stop="drawer = !drawer">
           <v-icon>menu</v-icon>
         </v-btn>
       </v-layout>
@@ -16,37 +13,27 @@
       <v-spacer></v-spacer>
       {{user}}
       <v-menu offset-y v-if="user">
-      <v-btn
-        slot="activator"
-        flat
-        icon
-      >
-       <v-icon>arrow_drop_down</v-icon>
+        <v-btn slot="activator" flat icon>
+          <v-icon>arrow_drop_down</v-icon>
+        </v-btn>
+        <v-list>
+          <v-list-tile @click="toSettings">
+            <v-list-tile-title>Settings</v-list-tile-title>
+          </v-list-tile>
+          <v-list-tile @click="signout">
+            <v-list-tile-title>Sign Out</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
+      <v-btn flat icon v-if="!user" @click="toggleTheme(!isDark)">
+        <v-icon>brush</v-icon>
       </v-btn>
-      <v-list>
-        <v-list-tile
-          @click="toSettings"
-        >
-          <v-list-tile-title>Settings</v-list-tile-title>
-        </v-list-tile>
-         <v-list-tile
-          @click="signout"
-        >
-          <v-list-tile-title>Sign Out</v-list-tile-title>
-        </v-list-tile>
-      </v-list>
-    </v-menu>
     </v-toolbar>
 
-   
-
     <v-content>
-      <!-- TURN INTO A SEPARATE COMPONENT -->
-       <v-navigation-drawer
-          v-model="drawer"
-          absolute
-          temporary
-        >
+      <v-flex fill-height>
+        <!-- TURN INTO A SEPARATE COMPONENT -->
+        <v-navigation-drawer v-model="drawer" absolute temporary>
           <v-list>
             <v-list-tile avatar>
               <v-list-tile-avatar>
@@ -57,7 +44,7 @@
               </v-list-tile-content>
             </v-list-tile>
 
-             <v-list-tile dense class="highlight"  @click="toSettings">
+            <v-list-tile dense class="highlight" @click="toSettings">
               <v-list-tile-action>
                 <v-icon>settings</v-icon>
               </v-list-tile-action>
@@ -68,26 +55,26 @@
           </v-list>
           <v-divider></v-divider>
           <v-list>
-            <v-list-tile class="highlight" v-for="path in paths" :key="path.link" @click="navigateToLink(path.link)">
+            <v-list-tile
+              class="highlight"
+              v-for="path in paths"
+              :key="path.link"
+              @click="navigateToLink(path.link)"
+            >
               <v-list-tile-action>
                 <v-icon>{{path.icon}}</v-icon>
               </v-list-tile-action>
               <v-list-tile-content>
-                <v-list-tile-title>
-                 {{path.text}}
-                </v-list-tile-title>
+                <v-list-tile-title>{{path.text}}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
-      </v-navigation-drawer>
-      <v-breadcrumbs :items="breadcrumbs">
-        <v-icon slot="divider">chevron_right</v-icon>
-        <template slot="item" slot-scope="props">
-         <router-link :to="props.item.href" :class="{disabled:props.item.current}"> {{props.item.text.toUpperCase() }}</router-link>
-        </template>
-      </v-breadcrumbs>
-      <app-snackbar></app-snackbar>
-     <router-view></router-view>
+        </v-navigation-drawer>
+        <v-progress-linear :indeterminate="true" v-show="inProgress"></v-progress-linear>
+        <app-breadcrumbs></app-breadcrumbs>
+        <app-snackbar></app-snackbar>
+        <router-view></router-view>
+      </v-flex>
     </v-content>
   </v-app>
 </template>
@@ -103,9 +90,8 @@
   width: 0px;
 }
 
-.disabled {
-  color: grey !important;
-  pointer-events: none;
+.v-progress-linear {
+  margin: 0;
 }
 </style>
 
@@ -115,43 +101,45 @@ import { Vue, Component, Watch } from "vue-property-decorator";
 import { Getter, Action } from "vuex-class";
 
 import SnackbarComponent from "./components/Snackbar.vue";
-
+import BreadcrumbsComponent from "./components/Breadcrumbs.vue";
 @Component({
   name: "app",
   mixins: [],
   components: {
-    appSnackbar: SnackbarComponent
+    appSnackbar: SnackbarComponent,
+    appBreadcrumbs: BreadcrumbsComponent
   }
 })
 export default class App extends Vue {
+  @Getter("inProgress")
+  inProgress!: boolean;
   @Getter("username")
   user: any;
   @Getter("fullName")
   name: any;
-  @Getter("breadcrumbs")
-  breadcrumbs;
+  @Getter("isDark") isDark!: boolean;
+  @Action("ToggleTheme") toggleTheme;
   @Action("Logout")
   logout: any;
   @Action("SetBreadcrumbs")
   setBreadcrumbs;
-  @Watch("$route")
+  @Watch("$route", { immediate: true })
   onRouteChange(val: any, oldVal: any) {
     this.updateBreadcrumbs();
   }
-
   public drawer: boolean = false;
 
   updateBreadcrumbs() {
     this.setBreadcrumbs(this.$route.meta.breadcrumbs);
   }
 
-  created() {
-    this.updateBreadcrumbs();
-  }
+  // created() {
+  //   this.updateBreadcrumbs();
+  // }
 
   public paths = [
     { text: "Dashboard", icon: "home", link: "/" },
-    { text: "Neck diagrams", icon: "library_music", link: "/diagrams" }
+    { text: "Diagrams", icon: "library_music", link: "/diagrams" }
   ];
 
   public navigateToLink(link) {

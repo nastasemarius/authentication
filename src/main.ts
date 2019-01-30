@@ -7,15 +7,15 @@ import router from "./router";
 import store from "./store/store";
 
 import Vuelidate from 'vuelidate';
+import VueRx from 'vue-rx'
 
+Vue.use(VueRx)
 Vue.use(Vuelidate);
 
 Vue.config.productionTip = false;
 
-console.log('State is:',store.state);
-
 new Vue({
   router,
-  store,
+  store: store,
   render: h => h(App)
 }).$mount("#app");
